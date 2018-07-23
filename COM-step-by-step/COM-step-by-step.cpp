@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include <iostream>
 #include <objbase.h>
+#include <unknwn.h>
 
 interface IX
 {
@@ -31,7 +32,7 @@ public:
 };
 
 
-int main()
+int not_main()
 {
 	CA* pA = new CA;
 
