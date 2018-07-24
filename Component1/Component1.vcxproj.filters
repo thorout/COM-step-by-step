@@ -24,24 +24,18 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IFace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Create.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Create.cpp">
+    <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Client1.cpp">
+    <ClCompile Include="..\COM-step-by-step\Guids.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Guids.cpp">
+    <ClCompile Include="cmpnt1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
