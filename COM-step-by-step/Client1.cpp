@@ -1,27 +1,20 @@
 //
-// Client1.cpp
-// To compile, use: cl Client1.cpp Create.cpp GUIDs.cpp UUID.lib
+// Client3.cpp
+// To compile, use: cl Client3.cpp Create.cpp GUIDs.cpp UUID.lib
 //
 #include <iostream>
 #include <objbase.h>
-//#include <TCHAR.H>
 
 #include "Iface.h"
 #include "Create.h"
 
-//#ifdef _UNICODE
-//#define IN() cin >> x
-//#else
-//typedef char TCHAR;
-//#endif
-
 
 using namespace std;
 
-static void trace(const char* msg) { cout << "Client 1:\t" << msg << endl; }
+void trace(const char* msg) { cout << "Client 3:\t" << msg << endl; }
 
 //
-// Client1
+// Client
 //
 int main()
 {
@@ -38,7 +31,6 @@ int main()
 	#endif
 
 	cout << endl;
-	cout << name << endl;
 
 	// Create component by calling the CreateInstance function in the DLL.
 	trace("Get an IUnknown pointer.");
@@ -63,6 +55,36 @@ int main()
 	else
 	{
 		trace("Could not get interface IX.");
+	}
+
+	trace("Ask for interface IY.");
+
+	IY* pIY;
+	hr = pIUnknown->QueryInterface(IID_IY, (void**)&pIY);
+	if (SUCCEEDED(hr))
+	{
+		trace("Succeeded getting IY.");
+		pIY->Fy();          // Use interface IY.
+		pIY->Release();
+	}
+	else
+	{
+		trace("Could not get interface IY.");
+	}
+
+	trace("Ask for interface IZ.");
+
+	IZ* pIZ;
+	hr = pIUnknown->QueryInterface(IID_IZ, (void**)&pIZ);
+	if (SUCCEEDED(hr))
+	{
+		trace("Succeeded getting IZ.");
+		pIZ->Fz();          // Use interface IZ.
+		pIZ->Release();
+	}
+	else
+	{
+		trace("Could not get interface IZ.");
 	}
 
 	trace("Release IUnknown interface.");
