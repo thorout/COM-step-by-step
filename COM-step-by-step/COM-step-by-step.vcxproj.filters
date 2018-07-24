@@ -29,10 +29,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="COM-step-by-step.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IUnknown.cpp">
+    <ClCompile Include="RefCount.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

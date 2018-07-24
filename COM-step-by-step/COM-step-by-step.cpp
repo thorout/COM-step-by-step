@@ -32,7 +32,7 @@ public:
 };
 
 
-int not_main()
+int not2_main()
 {
 	CA* pA = new CA;
 

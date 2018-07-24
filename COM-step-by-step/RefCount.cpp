@@ -1,7 +1,10 @@
 //
-// IUnknown.cpp
-// To compile use: cl IUnknown.cpp UUID.lib
+// RefCount.cpp
+// To compile, use: cl RefCount.cpp UUID.lib
 //
+
+//chapter 4
+
 #include <iostream>
 #include <objbase.h>
 
@@ -9,6 +12,10 @@ using namespace std;
 
 void trace(const char* msg) { cout << msg << endl; }
 
+// Forward references for GUIDs
+extern const IID IID_IX;
+extern const IID IID_IY;
+extern const IID IID_IZ;
 
 // Interfaces
 interface IX : IUnknown
@@ -26,53 +33,77 @@ interface IZ : IUnknown
 	virtual void __stdcall Fz() = 0;
 };
 
-// Forward references for GUIDs
-extern const IID IID_IX;
-extern const IID IID_IY;
-extern const IID IID_IZ;
 
 //
 // Component
 //
 class CA : public IX, public IY
 {
-	//IUnknown implementation
+	// IUnknown implementation
 	HRESULT __stdcall QueryInterface(const IID& iid, void** ppv) override;
-	ULONG __stdcall AddRef() override { return 0; }
-	ULONG __stdcall Release() override { return 0; }
+	ULONG __stdcall AddRef() override;
+	ULONG __stdcall Release() override;
 
 	// Interface IX implementation
 	virtual void __stdcall Fx() { cout << "Fx" << endl; }
 
 	// Interface IY implementation
 	virtual void __stdcall Fy() { cout << "Fy" << endl; }
+
+public:
+	// Constructor
+	CA() : m_cRef(0) { cout << "Initial value of m_cRef = " << m_cRef << endl; }
+
+	// Destructor
+	~CA() { trace("CA:     Destroy self."); }
+
+private:
+	long m_cRef;
 };
 
 HRESULT __stdcall CA::QueryInterface(const IID& iid, void** ppv)
 {
 	if (iid == IID_IUnknown)
 	{
-		trace("QueryInterface: Return pointer to IUnknown.");
+		trace("CA QI:  Return pointer to IUnknown.");
 		*ppv = static_cast<IX*>(this);
 	}
 	else if (iid == IID_IX)
 	{
-		trace("QueryInterface: Return pointer to IX.");
+		trace("CA QI:  Return pointer to IX.");
 		*ppv = static_cast<IX*>(this);
 	}
 	else if (iid == IID_IY)
 	{
-		trace("QueryInterface: Return pointer to IY.");
+		trace("CA QI:  Return pointer to IY.");
 		*ppv = static_cast<IY*>(this);
 	}
 	else
 	{
-		trace("QueryInterface: Interface not supported.");
+		trace("CA QI:  Interface not supported.");
 		*ppv = NULL;
 		return E_NOINTERFACE;
 	}
-	reinterpret_cast<IUnknown*>(*ppv)->AddRef(); // See Chapter 4.
+	reinterpret_cast<IUnknown*>(*ppv)->AddRef();
 	return S_OK;
+}
+
+ULONG __stdcall CA::AddRef()
+{
+	cout << "CA:     AddRef = " << m_cRef + 1 << '.' << endl;
+	return InterlockedIncrement(&m_cRef);
+}
+
+ULONG __stdcall CA::Release()
+{
+	cout << "CA:     Release = " << m_cRef - 1 << '.' << endl;
+
+	if (InterlockedDecrement(&m_cRef) == 0)
+	{
+		delete this;
+		return 0;
+	}
+	return m_cRef;
 }
 
 //
@@ -106,81 +137,59 @@ static const IID IID_IZ =
 //
 // Client
 //
-int not_main()
+int main()
 {
 	HRESULT hr;
 
-	trace("Client:         Get an IUnknown pointer.");
+	trace("Client: Get an IUnknown pointer.");
 	IUnknown* pIUnknown = CreateInstance();
 
 
-	trace("Client:         Get interface IX.");
+	trace("Client: Get interface IX.");
 
 	IX* pIX = NULL;
 	hr = pIUnknown->QueryInterface(IID_IX, (void**)&pIX);
+
 	if (SUCCEEDED(hr))
 	{
-		trace("Client:         Succeeded getting IX.");
+		trace("Client: Succeeded getting IX.");
 		pIX->Fx();          // Use interface IX.
+		pIX->Release();
 	}
 
 
-	trace("Client:         Get interface IY.");
+	trace("Client: Get interface IY.");
 
 	IY* pIY = NULL;
 	hr = pIUnknown->QueryInterface(IID_IY, (void**)&pIY);
 	if (SUCCEEDED(hr))
 	{
-		trace("Client:         Succeeded getting IY.");
+		trace("Client: Succeeded getting IY.");
 		pIY->Fy();          // Use interface IY.
+		pIY->Release();
 	}
 
 
-	trace("Client:         Ask for an unsupported interface.");
+	trace("Client: Ask for an unsupported interface.");
 
 	IZ* pIZ = NULL;
 	hr = pIUnknown->QueryInterface(IID_IZ, (void**)&pIZ);
 	if (SUCCEEDED(hr))
 	{
-		trace("Client:         Succeeded in getting interface IZ.");
+		trace("Client: Succeeded in getting interface IZ.");
 		pIZ->Fz();
+		pIZ->Release();
 	}
 	else
 	{
-		trace("Client:         Could not get interface IZ.");
+		trace("Client: Could not get interface IZ.");
 	}
 
 
-	trace("Client:         Get interface IY from interface IX.");
-
-	IY* pIYfromIX = NULL;
-	hr = pIX->QueryInterface(IID_IY, (void**)&pIYfromIX);
-	if (SUCCEEDED(hr))
-	{
-		trace("Client:         Succeeded getting IY.");
-		pIYfromIX->Fy();
-	}
-
-
-	trace("Client:         Get interface IUnknown from IY.");
-
-	IUnknown* pIUnknownFromIY = NULL;
-	hr = pIY->QueryInterface(IID_IUnknown, (void**)&pIUnknownFromIY);
-	if (SUCCEEDED(hr))
-	{
-		cout << "Are the IUnknown pointers equal?  ";
-		if (pIUnknownFromIY == pIUnknown)
-		{
-			cout << "Yes, pIUnknownFromIY == pIUnknown." << endl;
-		}
-		else
-		{
-			cout << "No, pIUnknownFromIY != pIUnknown." << endl;
-		}
-	}
-
-	// Delete the component.
-	delete pIUnknown;
+	trace("Client: Release IUnknown interface.");
+	pIUnknown->Release();
 
 	return 0;
 }
+
+
