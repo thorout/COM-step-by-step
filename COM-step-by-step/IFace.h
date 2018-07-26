@@ -1,30 +1,32 @@
 #pragma once
 //
-// Iface.h
+// Iface.h - 
+//    Declarations of interfaces, IIDs, and CLSID
+//    shared by the client and the component.
 //
-
-// Interfaces
 interface IX : IUnknown
 {
-	virtual void __stdcall Fx() = 0;
+	virtual void pascal Fx() = 0;
 };
+
 
 interface IY : IUnknown
 {
-	virtual void __stdcall Fy() = 0;
+	virtual void pascal Fy() = 0;
 };
+
 
 interface IZ : IUnknown
 {
-	virtual void __stdcall Fz() = 0;
+	virtual void pascal Fz() = 0;
 };
 
-// Forward references for GUIDs
-extern "C"
-{
-	extern const IID IID_IX;
-	extern const IID IID_IY;
-	extern const IID IID_IZ;
-}
+//
+// Declaration of GUIDs for interfaces and component.
+//   These constants are defined in GUIDs.cpp.
+//
+extern "C" const IID IID_IX;
+extern "C" const IID IID_IY;
+extern "C" const IID IID_IZ;
 
-
+extern "C" const CLSID CLSID_Component1;
